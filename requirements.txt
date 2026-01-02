@@ -1,0 +1,8 @@
+# --- Core Data Processing ---
+pandas>=2.0.0       # The backbone for DataFrame manipulation and CSV I/O
+
+# --- Text Processing ---
+unidecode>=1.3.0    # Critical for sanitizing international text (e.g., 'Renée' -> 'Renee')
+
+# --- Performance Optimization ---
+pandarallel>=1.6.0  # Enables parallel processing to bypass Python GIL (Time Complexity optimization)
