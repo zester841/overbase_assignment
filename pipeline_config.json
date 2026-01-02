@@ -1,0 +1,59 @@
+{
+    "HIERARCHY_RULES": [
+        {
+            "level": 1,
+            "name": "Strategic Leadership",
+            "keywords": [
+                "chief",
+                "officer",
+                "founder",
+                "president",
+                "cmo",
+                "cto",
+                "ceo"
+            ]
+        },
+        {
+            "level": 2,
+            "name": "Executive Management",
+            "keywords": [
+                "head",
+                "partner",
+                "principal",
+                "evp",
+                "svp"
+            ]
+        },
+        {
+            "level": 3,
+            "name": "Senior Management",
+            "keywords": [
+                "director",
+                "vice"
+            ]
+        }
+    ],
+    "EXCLUSION_KEYWORDS": [
+        "manager",
+        "engineer",
+        "analyst",
+        "lead"
+    ],
+    "DOMAIN_MAPPINGS": {
+        "AWS": "TODO_FILL_IN_DOMAIN.com",
+        "DDN": "TODO_FILL_IN_DOMAIN.com",
+        "Heroku (Salesforce)": "salesforce.com",
+        "(Company not stated)": "companynotstated.com",
+        "HPE": "TODO_FILL_IN_DOMAIN.com",
+        "IBM": "TODO_FILL_IN_DOMAIN.com",
+        "SAP": "TODO_FILL_IN_DOMAIN.com",
+        "QAD": "TODO_FILL_IN_DOMAIN.com",
+        "IGEL": "TODO_FILL_IN_DOMAIN.com",
+        "GE": "TODO_FILL_IN_DOMAIN.com",
+        "EMC": "TODO_FILL_IN_DOMAIN.com",
+        "CSC": "TODO_FILL_IN_DOMAIN.com",
+        "HCL": "TODO_FILL_IN_DOMAIN.com",
+        "IFS": "TODO_FILL_IN_DOMAIN.com",
+        "The Clorox Company": "TODO_MANUAL_CHECK.com"
+    }
+}

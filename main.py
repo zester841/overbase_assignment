@@ -1,75 +1,61 @@
 import pandas as pd
 import re
 import logging
-from dataclasses import dataclass, field
+import json
+import time
+from dataclasses import dataclass
 from typing import List, Dict, Optional, Any, Tuple
 from pathlib import Path
 from unidecode import unidecode
 from pandarallel import pandarallel
 
-# --- 0. SYSTEM SETUP ---
-# Initialize Parallel Processing to bypass Python's Global Interpreter Lock (GIL).
-# This divides O(N) complexity by the number of CPU cores available.
+# --- 0. SYSTEM BOOT ---
+# Initialize shared memory for parallel workers
 pandarallel.initialize(progress_bar=True, verbose=0)
 
-# Professional Logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+# Configure logging to look like a build tool
+logging.basicConfig(level=logging.INFO, format='%(message)s')
 
-# --- 1. CONFIGURATION LAYER (The "Control Panel") ---
+# Constants
+CONFIG_FILE = "pipeline_config.json"
+INPUT_FILE = "cmo_videos_names.csv"
+OUTPUT_FILE = "final_execs.csv"
+
+# --- 1. DATA MODELS ---
 
 @dataclass
 class HierarchyRule:
-    """Defines a specific tier in the organization."""
-    level: int  # 1 is highest
+    """Immutable rule defining a seniority tier."""
+    level: int
     name: str
     keywords: List[str]
 
-# Dynamic Rule Engine Configuration (Open/Closed Principle)
-HIERARCHY_CONFIG = [
-    HierarchyRule(
-        level=1, 
-        name="Strategic Leadership (C-Suite & Founders)", 
-        keywords=['founder', 'ceo', 'cto', 'cmo', 'cfo', 'coo', 'cio', 'ciso', 'president', 'chairman', 'owner']
-    ),
-    HierarchyRule(
-        level=2, 
-        name="Executive Management", 
-        keywords=['evp', 'svp', 'chief', 'partner', 'principal', 'head of']
-    ),
-    HierarchyRule(
-        level=3, 
-        name="Senior Management", 
-        keywords=['vice president', 'vp', 'director']
-    )
-]
+# --- 2. CONFIGURATION SERVICE ---
 
-EXCLUSION_KEYWORDS = [
-    'student', 'intern', 'analyst', 'engineer', 'consultant', 'architect', 'specialist', 
-    'coordinator', 'manager', 'lead', 'associate'
-]
+class ConfigLoader:
+    """
+    Handles the bridge between the JSON definition and Python Logic.
+    This ensures the pipeline is strictly configuration-driven.
+    """
+    @staticmethod
+    def load_config(path: str) -> Dict:
+        file_path = Path(path)
+        if not file_path.exists():
+            logging.error(f"🛑 FATAL: Configuration '{path}' missing.")
+            logging.error("   -> Run 'python auto_generate_config.py' first.")
+            exit(1)
+        
+        with open(file_path, 'r') as f:
+            return json.load(f)
 
-DOMAIN_MAPPINGS = {
-    "AWS": "amazon.com",
-    "Amazon Web Services": "amazon.com",
-    "Google Cloud": "google.com",
-    "Heroku (Salesforce)": "salesforce.com",
-    "Heroku": "salesforce.com",
-    "IBM Storage": "ibm.com",
-    "IBM Cloud": "ibm.com",
-    "HP Cloud": "hp.com",
-    "Mitel Networks": "mitel.com",
-    "The Clorox Company": "clorox.com",
-    "Predix, General Electric": "ge.com",
-    "GE": "ge.com",
-    "Tintri by DDN": "tintri.com",
-    "VMware": "vmware.com",
-    "Adobe Enterprise": "adobe.com"
-}
+    @staticmethod
+    def parse_rules(raw_rules: List[Dict]) -> List[HierarchyRule]:
+        """Hydrates JSON objects into Python Dataclasses."""
+        return [HierarchyRule(**r) for r in raw_rules]
 
-# --- 2. CORE UTILITIES ---
+# --- 3. UTILITIES ---
 
 class StringUtils:
-    """Stateless utility for text hygiene."""
     @staticmethod
     def sanitize(text: Any) -> str:
         if pd.isna(text) or str(text).strip() in ["—", "-", ""]:
@@ -78,173 +64,171 @@ class StringUtils:
 
     @staticmethod
     def extract_nickname(full_name: str) -> Tuple[str, str, Optional[str]]:
-        """Parses complex names like 'Jennifer "JJ" Johnson'."""
-        clean_name = StringUtils.sanitize(full_name)
-        nickname = None
+        """
+        Parses 'Jennifer "JJ" Johnson' -> ('jennifer', 'johnson', 'jj')
+        """
+        clean = StringUtils.sanitize(full_name)
+        nick = None
         
-        match = re.search(r'\"(.*?)\"', clean_name)
+        # Capture text inside quotes
+        match = re.search(r'\"(.*?)\"', clean)
         if match:
-            nickname = match.group(1).lower().replace(" ", "")
-            clean_name = clean_name.replace(f'"{match.group(1)}"', '').replace('  ', ' ')
+            nick = match.group(1).lower().replace(" ", "")
+            # Remove nickname from main string to get clean First/Last
+            clean = clean.replace(f'"{match.group(1)}"', '').replace('  ', ' ')
             
-        parts = clean_name.split()
+        parts = clean.split()
         first = parts[0].lower() if parts else ""
         last = parts[-1].lower() if len(parts) > 1 else ""
         
-        return first, last, nickname
+        return first, last, nick
 
-# --- 3. BUSINESS LOGIC MODULES (Services) ---
+# --- 4. CORE ENGINES (Business Logic) ---
 
 class RankerEngine:
-    """Evaluates titles against HIERARCHY_CONFIG using optimized Regex."""
     def __init__(self, rules: List[HierarchyRule], exclusions: List[str]):
+        # Sort rules by priority (Level 1 first)
         self.rules = sorted(rules, key=lambda x: x.level)
-        # Pre-compile Regex for O(1) matching speed per row
-        self.exclusion_pattern = re.compile(r'\b(' + '|'.join(exclusions) + r')\b', re.IGNORECASE)
+        # Pre-compile exclusion regex for O(1) checking
+        self.exclude_regex = re.compile(r'\b(' + '|'.join(exclusions) + r')\b', re.IGNORECASE)
         
     def assess_seniority(self, title: str) -> int:
         t = title.lower()
         
-        if self.exclusion_pattern.search(t):
+        # Fast fail on exclusion keywords
+        if self.exclude_regex.search(t): 
             return 999 
-
-        # Chain of Responsibility
+        
+        # Chain of Responsibility: Check tiers in order
         for rule in self.rules:
-            # We iterate rules to maintain hierarchy priority
             if any(k in t for k in rule.keywords):
                 return rule.level
                 
-        return 999
+        return 999 # No match
 
-class DomainIntelligence:
-    """Resolves company names to domains."""
+class DomainResolver:
     def __init__(self, mappings: Dict[str, str]):
         self.mappings = mappings
-        # Regex to strip legal entities
-        self.legal_regex = re.compile(r'\b(inc|ltd|llc|corp|corporation|company|networks|labs|technologies|group)\b', re.IGNORECASE)
+        # Regex to strip legal entities (Inc, LLC, etc)
+        self.legal_strip = re.compile(r'\b(inc|ltd|llc|corp|corporation|company|group|labs)\b', re.IGNORECASE)
 
     def resolve(self, company: str) -> str:
         clean = StringUtils.sanitize(company)
         
-        # 1. O(1) Lookup
+        # 1. Config Lookup (Highest Priority)
         if clean in self.mappings:
-            return self.mappings[clean]
+            val = self.mappings[clean]
+            # Safety check: If user forgot to remove "TODO" from JSON
+            if "TODO" in val:
+                logging.warning(f"⚠️  Config Warning: '{clean}' maps to a TODO value. Falling back to heuristic.")
+            else:
+                return val
 
-        # 2. Heuristic Checks
-        if re.search(r'\.(ai|io|com|net|co|org)$', clean.lower()):
+        # 2. Heuristic: Is it already a domain?
+        if re.search(r'\.(ai|io|com|net|org)$', clean.lower()):
             return clean.lower()
 
-        # 3. Regex Cleaning
+        # 3. Algorithmic Fallback
         c = clean.lower()
-        c = re.sub(r"\(.*?\)", "", c)
-        c = self.legal_regex.sub("", c) # Optimized Pre-compiled sub
-        c = re.sub(r"[^a-z0-9]", "", c)
-        
+        c = re.sub(r"\(.*?\)", "", c) # Remove parentheticals
+        c = self.legal_strip.sub("", c)
+        c = re.sub(r"[^a-z0-9]", "", c) # Remove special chars
         return f"{c}.com"
 
-class EmailStrategist:
-    """Generates context-aware email permutations."""
-    def generate(self, first: str, last: str, nickname: str, domain: str, seniority_level: int) -> List[str]:
+class EmailEngine:
+    """Strategy pattern for generating contact permutations."""
+    def generate(self, first, last, nick, domain, level) -> List[str]:
         if not domain: return []
+        opts = []
         
-        candidates = []
-        
-        # Strategy A: Nickname Priority
-        if nickname:
-            if last: candidates.append(f"{nickname}.{last}@{domain}")
-            candidates.append(f"{nickname}@{domain}")
+        # Strategy A: Nickname (High Confidence)
+        if nick:
+            if last: opts.append(f"{nick}.{last}@{domain}")
+            opts.append(f"{nick}@{domain}")
 
-        # Strategy B: Founder Priority (First Name Only)
-        if seniority_level == 1 and first:
-            candidates.append(f"{first}@{domain}")
+        # Strategy B: Founder Vanity URL
+        if level == 1 and first:
+            opts.append(f"{first}@{domain}")
 
-        # Strategy C: Standard
+        # Strategy C: Standard Corporate
         if first and last:
-            candidates.append(f"{first}.{last}@{domain}")
-            
-        # Strategy D: Fallback
-        if first and last:
-            candidates.append(f"{first[0]}{last}@{domain}")
+            opts.append(f"{first}.{last}@{domain}")
+            opts.append(f"{first[0]}{last}@{domain}")
 
-        return list(dict.fromkeys(candidates))
+        # Deduplicate while preserving priority order
+        return list(dict.fromkeys(opts))
 
-# --- 4. ORCHESTRATOR (Parallelized Pipeline) ---
+# --- 5. PIPELINE ORCHESTRATOR ---
 
-class ProcessingPipeline:
-    def __init__(self, input_path: str, output_path: str):
-        self.input_path = Path(input_path)
-        self.output_path = Path(output_path)
+class Pipeline:
+    def __init__(self):
+        logging.info(f"⚙️  Initializing Pipeline...")
         
-        # Dependency Injection
-        self.ranker = RankerEngine(HIERARCHY_CONFIG, EXCLUSION_KEYWORDS)
-        self.domain_resolver = DomainIntelligence(DOMAIN_MAPPINGS)
-        self.email_strategist = EmailStrategist()
+        # 1. Load Dynamic Config
+        raw_conf = ConfigLoader.load_config(CONFIG_FILE)
+        
+        # 2. Inject Dependencies
+        self.ranker = RankerEngine(
+            ConfigLoader.parse_rules(raw_conf["HIERARCHY_RULES"]), 
+            raw_conf["EXCLUSION_KEYWORDS"]
+        )
+        self.resolver = DomainResolver(raw_conf["DOMAIN_MAPPINGS"])
+        self.emailer = EmailEngine()
 
-    def _process_single_row(self, row) -> Optional[pd.Series]:
+    def _worker(self, row) -> Optional[pd.Series]:
         """
-        Pure function designed for parallel execution.
-        Takes a raw Series, returns a processed Series or None.
+        Pure function to be distributed across CPU cores.
         """
-        # 1. Clean Inputs
-        raw_title = StringUtils.sanitize(row.get('Title', ''))
-        raw_company = StringUtils.sanitize(row.get('Company', ''))
-        raw_name = StringUtils.sanitize(row.get('Name', ''))
-
-        # 2. Score Seniority (Business Logic)
-        level = self.ranker.assess_seniority(raw_title)
+        # A. Clean
+        title = StringUtils.sanitize(row.get('Title'))
         
-        if level == 999:
-            return None # Filter out immediately to save memory
+        # B. Filter (Fast)
+        rank = self.ranker.assess_seniority(title)
+        if rank == 999: return None 
 
-        # 3. Resolve Attributes
-        first, last, nick = StringUtils.extract_nickname(raw_name)
-        domain = self.domain_resolver.resolve(raw_company)
+        # C. Enrich
+        first, last, nick = StringUtils.extract_nickname(row.get('Name'))
+        domain = self.resolver.resolve(row.get('Company'))
         
-        # 4. Generate Emails
-        emails = self.email_strategist.generate(first, last, nick, domain, level)
+        # D. Generate
+        emails = self.emailer.generate(first, last, nick, domain, rank)
 
-        # 5. Return Enriched Data
         return pd.Series({
-            "Name": raw_name,
-            "Title": raw_title,
-            "Company": raw_company,
-            "Seniority_Level": level,
-            "Likely_Email_1": emails[0] if len(emails) > 0 else "",
-            "Likely_Email_2": emails[1] if len(emails) > 1 else "",
-            "Domain_Logic": domain
+            "Name": row.get('Name'),
+            "Title": title,
+            "Company": row.get('Company'),
+            "Rank": rank,
+            "Email_1": emails[0] if len(emails) > 0 else "",
+            "Email_2": emails[1] if len(emails) > 1 else "",
+            "Domain_Source": domain
         })
 
-    def execute(self):
-        logging.info(f"📂 Loading data from {self.input_path}...")
-        
+    def run(self):
+        logging.info(f"📂 Loading Source: {INPUT_FILE}")
         try:
-            df = pd.read_csv(self.input_path, on_bad_lines='skip')
+            df = pd.read_csv(INPUT_FILE, on_bad_lines='skip')
         except FileNotFoundError:
-            logging.error("Input file missing.")
+            logging.error("🛑 Input file missing.")
             return
 
-        logging.info(f"⚡ Spawning Parallel Workers across CPU Cores...")
+        logging.info(f"🚀 Spawning workers on available cores...")
+        start_time = time.time()
         
-        # PARALLEL EXECUTION --------------------------------------------------
-        # We use parallel_apply instead of standard apply.
-        # This keeps our complex OOP logic but scales it horizontally across cores.
-        processed_df = df.parallel_apply(self._process_single_row, axis=1)
-        # ---------------------------------------------------------------------
-
-        # Filter out None values (Excluded rows)
-        processed_df = processed_df.dropna()
-
-        # Sorting & Final Selection
-        processed_df = processed_df.sort_values(by=['Seniority_Level', 'Company'])
-        final_df = processed_df.head(50)
+        # --- PARALLEL EXECUTION ---
+        results = df.parallel_apply(self._worker, axis=1)
+        # --------------------------
+        
+        # Filter and Sort
+        results = results.dropna()
+        final_df = results.sort_values(by=['Rank', 'Company']).head(50)
         
         # Export
-        final_df.to_csv(self.output_path, index=False)
+        final_df.to_csv(OUTPUT_FILE, index=False)
+        duration = round(time.time() - start_time, 2)
         
-        logging.info(f"✨ Pipeline Complete.")
-        logging.info(f"💾 Output saved to {self.output_path} with {len(final_df)} executives.")
-        print("\n" + final_df[['Name', 'Likely_Email_1', 'Seniority_Level']].head().to_string())
+        logging.info(f"💾 Success! Wrote {len(final_df)} records to {OUTPUT_FILE}")
+        logging.info(f"⏱️  Execution Time: {duration}s")
+        print("\n" + final_df[['Name', 'Email_1', 'Rank']].head().to_string())
 
 if __name__ == "__main__":
-    pipeline = ProcessingPipeline("cmo_videos_names.csv", "final_execs.csv")
-    pipeline.execute()
+    Pipeline().run()
