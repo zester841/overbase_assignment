@@ -1,1 +1,51 @@
-Name,Title,Company,Seniority_Level,Email_1,Email_2,Domain_Used,0
+Name,Title,Company,Seniority_Level,Email_1,Email_2,Domain_Used
+Julia White,Chief Marketing Officer,AWS,1.0,julia@amazon.com,julia.white@amazon.com,amazon.com
+Mona Chadha,Director of Category Management,AWS,1.0,mona@amazon.com,mona.chadha@amazon.com,amazon.com
+Norman Guadagno,Chief Marketing Officer,Acoustic,1.0,norman@acoustic.com,norman.guadagno@acoustic.com,acoustic.com
+Gaidar Magdanurov,CMO & Chief Cyber Strategy Officer,Acronis,1.0,gaidar@acronis.com,gaidar.magdanurov@acronis.com,acronis.com
+Brian Reagan,CMO,Actifio,1.0,brian@actifio.com,brian.reagan@actifio.com,actifio.com
+Paul Forte,Chief Revenue Officer,Actifio,1.0,paul@actifio.com,paul.forte@actifio.com,actifio.com
+Brian Reagan,Chief Marketing Officer,Actifio,1.0,brian@actifio.com,brian.reagan@actifio.com,actifio.com
+Rachel Thornton,Chief Marketing Officer,Adobe Enterprise,1.0,rachel@adobe.com,rachel.thornton@adobe.com,adobe.com
+Beth Davidson,CMO,Agero,1.0,beth@agero.com,beth.davidson@agero.com,agero.com
+Raj Behara,VP and CTO,Agero,1.0,raj@agero.com,raj.behara@agero.com,agero.com
+Carolyn Crandall,Chief Marketing Officer,AirMDR,1.0,carolyn@airmdr.com,carolyn.crandall@airmdr.com,airmdr.com
+Ian Massingham,CMO,Aiven,1.0,ian@aiven.com,ian.massingham@aiven.com,aiven.com
+Gabriel Romero,Chief Marketing Officer,AllCloud,1.0,gabriel@allcloud.com,gabriel.romero@allcloud.com,allcloud.com
+Bruno Aziza,CMO,Alpine Data Labs,1.0,bruno@alpinedata.com,bruno.aziza@alpinedata.com,alpinedata.com
+Surbhi Agarwal,Chief Marketing Officer,Applied Intuition,1.0,surbhi@appliedintuition.com,surbhi.agarwal@appliedintuition.com,appliedintuition.com
+Joyce Kim,CMO,Arm,1.0,joyce@arm.com,joyce.kim@arm.com,arm.com
+Martina Trucco,Chief Marketing Officer,At-Bay,1.0,martina@atbay.com,martina.trucco@atbay.com,atbay.com
+Itamar Ankorion,CMO,Attunity,1.0,itamar@attunity.com,itamar.ankorion@attunity.com,attunity.com
+Itamar Ankorion,CMO,Attunity,1.0,itamar@attunity.com,itamar.ankorion@attunity.com,attunity.com
+April Crichlow,Chief Marketing Officer,AuditBoard,1.0,april@auditboard.com,april.crichlow@auditboard.com,auditboard.com
+Riadh Dridi,CMO,Automation Anywhere,1.0,riadh@automationanywhere.com,riadh.dridi@automationanywhere.com,automationanywhere.com
+Gary Conway,CMO,Automation Anywhere,1.0,gary@automationanywhere.com,gary.conway@automationanywhere.com,automationanywhere.com
+Alison Biggan,Chief Marketing Officer,Boomi,1.0,alison@boomi.com,alison.biggan@boomi.com,boomi.com
+Alison Biggan,CMO,Boomi,1.0,alison@boomi.com,alison.biggan@boomi.com,boomi.com
+Mandy Dhaliwal,CMO,Boomi,1.0,mandy@boomi.com,mandy.dhaliwal@boomi.com,boomi.com
+Chris Port,COO,Boomi,1.0,chris@boomi.com,chris.port@boomi.com,boomi.com
+Mandy Dhaliwal,CMO,Boomi,1.0,mandy@boomi.com,mandy.dhaliwal@boomi.com,boomi.com
+Steven Van Zanen,Chief Marketing Officer,BroadForward,1.0,steven@broadforward.com,steven.zanen@broadforward.com,broadforward.com
+David Parsons,VP - Global Alliances & CMO,CSC,1.0,david@csc.com,david.parsons@csc.com,csc.com
+David Parsons,VP of Global Alliances & CMO,CSC,1.0,david@csc.com,david.parsons@csc.com,csc.com
+David Parsons,Corporate VP of Global Alliances & CMO,CSC,1.0,david@csc.com,david.parsons@csc.com,csc.com
+Shlomo Kramer,Co-Founder & CEO,Cato Networks,1.0,shlomo@catonetworks.com,shlomo.kramer@catonetworks.com,catonetworks.com
+Julie Choi,Chief Marketing Officer,Cerebras,1.0,julie@cerebras.com,julie.choi@cerebras.com,cerebras.com
+Margaret Dawson,Chief Marketing Officer,Chronosphere,1.0,margaret@chronosphere.com,margaret.dawson@chronosphere.com,chronosphere.com
+Bill Hineline,Field Chief Technology Officer,Chronosphere,1.0,bill@chronosphere.com,bill.hineline@chronosphere.com,chronosphere.com
+Tim Minihan,CMO & EVP Strategy,Citrix,1.0,tim@citrix.com,tim.minihan@citrix.com,citrix.com
+Tim Minahan,EVP of Business Strategy and CMO,Citrix,1.0,tim@citrix.com,tim.minahan@citrix.com,citrix.com
+Jon Toor,Chief Marketing Officer,Cloudian,1.0,jon@cloudian.com,jon.toor@cloudian.com,cloudian.com
+Andy Hurt,Chief Marketing Officer,Cobalt Iron,1.0,andy@cobaltiron.com,andy.hurt@cobaltiron.com,cobaltiron.com
+Peter Guagenti,Chief Marketing Officer,Cockroach Labs,1.0,peter@cockroach.com,peter.guagenti@cockroach.com,cockroach.com
+Lynn Lucas,CMO,Cohesity,1.0,lynn@cohesity.com,lynn.lucas@cohesity.com,cohesity.com
+Lynn Lucas,CMO,Cohesity,1.0,lynn@cohesity.com,lynn.lucas@cohesity.com,cohesity.com
+Isabelle Guis,CMO,Commvault,1.0,isabelle@commvault.com,isabelle.guis@commvault.com,commvault.com
+Reza Morakabati,CIO,Commvault,1.0,reza@commvault.com,reza.morakabati@commvault.com,commvault.com
+Chris Powell,CMO,Commvault,1.0,chris@commvault.com,chris.powell@commvault.com,commvault.com
+Josh Harbert,SVP & CMO,Couchbase,1.0,josh@couchbase.com,josh.harbert@couchbase.com,couchbase.com
+John Kreisa,CMO,Couchbase,1.0,john@couchbase.com,john.kreisa@couchbase.com,couchbase.com
+Chandar Pattabhiram,CMO,Coupa,1.0,chandar@coupa.com,chandar.pattabhiram@coupa.com,coupa.com
+Abby Strong,CMO,Cribl,1.0,abby@cribl.com,abby.strong@cribl.com,cribl.com
+Jennifer “JJ” Johnson,Chief Marketing Officer,CrowdStrike,1.0,jj.johnson@crowdstrike.com,jj@crowdstrike.com,crowdstrike.com

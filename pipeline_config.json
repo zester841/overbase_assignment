@@ -2,23 +2,32 @@
     "HIERARCHY_RULES": [
         {
             "level": 1,
-            "name": "Strategic Leadership",
-            "keywords": ["founder", "ceo", "cto", "cmo", "cfo", "coo", "cio", "president", "chief", "owner"]
+            "name": "Strategic Leadership (C-Suite & Founders)",
+            "keywords": [
+                "founder", "ceo", "cto", "cmo", "cfo", "coo", "cio", 
+                "ciso", "president", "chairman", "owner", "chief"
+            ]
         },
         {
             "level": 2,
             "name": "Executive Management",
-            "keywords": ["evp", "svp", "partner", "principal", "head of", "executive vice president"]
+            "keywords": [
+                "evp", "svp", "partner", "principal", "head of", 
+                "executive vice president"
+            ]
         },
         {
             "level": 3,
             "name": "Senior Management",
-            "keywords": ["vice president", "vp", "director"]
+            "keywords": [
+                "vice president", "vp", "director"
+            ]
         }
     ],
     "EXCLUSION_KEYWORDS": [
-        "student", "intern", "analyst", "engineer", "consultant", "specialist", 
-        "coordinator", "manager", "lead", "associate", "sales manager"
+        "student", "intern", "analyst", "engineer", "consultant", 
+        "architect", "specialist", "coordinator", "manager", 
+        "lead", "associate", "sales manager"
     ],
     "DOMAIN_MAPPINGS": {
         "AWS": "amazon.com",
@@ -46,6 +55,8 @@
         "EMC": "dell.com",
         "CSC": "csc.com",
         "HCL": "hcltech.com",
-        "IFS": "ifs.com"
+        "IFS": "ifs.com",
+        "Arm": "arm.com",
+        "(Company not stated)": "unknown.com"
     }
 }
